@@ -39,14 +39,8 @@ function checkinfo {
                 $getVGA = (Get-WmiObject win32_VideoController).Description
                 Write-Host $getVGA -ForegroundColor Blue;
                 Write-Host "---------------------------------------------------------";
-                if ("$getwdversion" -gt 1809){
-                    write-host "Windows 10 version "$getwdversion -ForegroundColor Green;
-                    Write-Host "---------------------------------------------------------";
-                }else{
-                    write-host "Windows 10 version "$getwdversion -ForegroundColor red;
-                    Write-Host "This computer should be upgraded to higher version (1903 or 1909)"
-                    Write-Host "---------------------------------------------------------";
-                }
+                write-host "Windows 10 version "$getwdversion -ForegroundColor Green;
+                Write-Host "---------------------------------------------------------";
     }
 }
     else {
