@@ -23,7 +23,6 @@ function checkinfo {
                 if ($null -eq $getusername){
                     $getlocalmember = Get-LocalGroupMember Administrators | Where-Object {$_.ObjectClass -eq "User"} | Where-Object {$_.PrincipalSource -eq "ActiveDirectory"};
                     $username = $getlocalmember.Name;
-                    #Write-Host "Username is :"$username;
                 }
                 $getcpu = (Get-CimInstance -ClassName CIM_Processor).Name;
                 $getram = ((Get-ComputerInfo).OsTotalVisibleMemorySize)/0.001Gb;
@@ -31,14 +30,12 @@ function checkinfo {
                 $numberplus = $number + 1;
                 $gethdd = Get-PhysicalDisk | Select-Object MediaType, Size
                 $getwdversion = (Get-ComputerInfo).WindowsVersion
-                #$getpsdrive = Get-PSDrive
                 Write-Host "Username is: $getusername $username" -ForegroundColor Yellow;
                 Write-Host "---------------------------------------------------------";
                 Write-Host "CPU: $getcpu" -ForegroundColor Green;
                 Write-Host "Total RAM: $numberplus Gb";
                 Write-Host $gethdd;
                 Write-Host "---------------------------------------------------------";
-                #write-host $getpsdrive;
                 $getVGA = (Get-WmiObject win32_VideoController).Description
                 Write-Host $getVGA -ForegroundColor Blue;
                 Write-Host "---------------------------------------------------------";
