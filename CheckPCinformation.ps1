@@ -59,7 +59,16 @@ function checkmutiple{
 
 function checkone{
     $comp = read-host "What is the computername? ";
-    checkinfo -cp $comp;
+    $ip = $comp;
+    if ($comp -like "*"){
+        $computername = $comp;
+    }elseif ($comp -like "*.*.*.*"){
+        $computername = (Resolve-DnsName -Name $ip).NameHost;
+    }else {
+        Write-Warning "Something went wrong! Please make sure your computername or IP address is right";
+        exit;
+    }
+    checkinfo -cp $computername;
 }
 
 #remove or add # before function you want to run. For ex: If you want to get information of mutiple computers, remove # in checkmutiple and add #checkone and counterwork. 
