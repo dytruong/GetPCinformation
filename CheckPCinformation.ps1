@@ -16,7 +16,7 @@ function checkinfo {
         $ipaddress = (Test-Connection -ComputerName $cp -count 1).IPV4Address.IPAddressToString
         write-host "IP address is $ipaddress" -ForegroundColor Blue;
         Invoke-Command -ComputerName $cp -Credential $cred -ScriptBlock{
-                $macaddress = (Get-NetAdapter | Where-Object {$_.Name -eq "Ethernet"}).MacAddress;
+                $macaddress = (Get-NetAdapter | Where-Object {$_.Name -like "Ethernet*"}).MacAddress;
                 Write-Host "MAC address is $macaddress" -ForegroundColor Blue;
                 Write-Host "---------------------------------------------------------";
                 $getusername = (Get-ComputerInfo).CsUserName;
