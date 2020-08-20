@@ -15,10 +15,10 @@ function checkinfo {
         Write-Host "---------------------------------------------------------";
         $ipaddress = (Test-Connection -ComputerName $cp -count 1).IPV4Address.IPAddressToString
         write-host "IP address is $ipaddress" -ForegroundColor Blue;
-        $macaddress = (Get-NetAdapter | Where-Object {$_.Name -eq "Ethernet"}).MacAddress;
-        Write-Host "MAC address is $macaddress" -ForegroundColor Blue;
-        Write-Host "---------------------------------------------------------";
         Invoke-Command -ComputerName $cp -Credential $cred -ScriptBlock{
+                $macaddress = (Get-NetAdapter | Where-Object {$_.Name -eq "Ethernet"}).MacAddress;
+                Write-Host "MAC address is $macaddress" -ForegroundColor Blue;
+                Write-Host "---------------------------------------------------------";
                 $getusername = (Get-ComputerInfo).CsUserName;
                 if ($null -eq $getusername){
                     $getlocalmember = Get-LocalGroupMember Administrators | Where-Object {$_.ObjectClass -eq "User"} | Where-Object {$_.PrincipalSource -eq "ActiveDirectory"};
