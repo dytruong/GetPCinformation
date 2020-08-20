@@ -60,7 +60,7 @@ function checkmutiple{
 function checkone{
     $comp = read-host "What is the computername? ";
     $ip = $comp;
-    if ($comp -like "*"){
+    if ($comp -like "saiwks*"){                     #update the PC naming convetion saiwks;
         $computername = $comp;
     }elseif ($comp -like "*.*.*.*"){
         $computername = (Resolve-DnsName -Name $ip).NameHost;
