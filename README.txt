@@ -14,7 +14,7 @@ II. How to get information on mutiple computers?
 	- Add all computer (computername) that you want to get information to the same column in computername.csv file.
 	- Update your domain admin and password in CheckPCinformation.ps1.
 	- Update your PC naming convetion
-		+ Change saiwks to your own.
+		+ Change saiwks to yours
 	- Remove hashtag # in first of a line checkmutiple to get mutiple PCs information. And add # to disable.
 		+ Checkone is check one defined computer.
 		+ Checkmutiple is check mutiple at the same time. 
