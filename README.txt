@@ -6,14 +6,14 @@ There are two functions on this script:
 
 I. How to get information on one computer?
 	- Update your domain admin and password in CheckPCinformation.ps1.
-	- Update your PC naming convetion
+	- Update your PC naming convetion in CheckPCinformation.ps1.
 		+ Change saiwks to your own.
 	- Run as Administrator file RunasAdministrator.bat to run.
 
 II. How to get information on mutiple computers?
 	- Add all computer (computername) that you want to get information to the same column in computername.csv file.
 	- Update your domain admin and password in CheckPCinformation.ps1.
-	- Update your PC naming convetion
+	- Update your PC naming convetion in CheckPCinformation.ps1.
 		+ Change saiwks to yours
 	- Remove hashtag # in first of a line checkmutiple to get mutiple PCs information. And add # to disable.
 		+ Checkone is check one defined computer.
