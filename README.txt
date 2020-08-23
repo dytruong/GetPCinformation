@@ -25,7 +25,7 @@ II. How to get information on mutiple computers?
   + DO NOT run two functions (checkmutiple and checkone) at the same time. 
 
 ---------------------------------------INFORMATION----------------------------------------------------------------
-This script can get information below:
+This script get information below:
 - IP address
 - MAC address
 - Current logged username
