@@ -1,21 +1,63 @@
-#Author - TruongproKuteVIP^^
+#############################################################  
+$username = "truong_tranduy"    
+$security_path = "C:\Windows\Temp\passwd.txt"
+$pstool_location = "C:\Pstool\psexec.exe"
 
-$password = "Password@123" | ConvertTo-SecureString -asPlainText -Force;    #update your domain admin password 
-$username = "a.nguyenvan@abc.com";                                          #update your domain admin account
-$cred = New-object System.Management.Automation.PSCredential($username,$password)
+#############################################################
+#Credential handling
+function Save_credential{
+    param($username, $security_path)
 
+    #Check security path to know this file passwd is alive or not
+    if (Test-Path $security_path){
+        $password = Get-Content "$security_path" | ConvertTo-SecureString
+    }
+    #if file was saved already! Just use it!
+    else{
+        (get-credential $username).password | ConvertFrom-SecureString | set-content "$security_path"
+        $password = Get-Content "$security_path" | ConvertTo-SecureString
+    }
+    
+    #get credential
+    $credential = New-Object System.Management.Automation.PsCredential($username, $password)
+    
+    #test credential
+    $username = $credential.username
+    $password = $credential.GetNetworkCredential().password
+    
+    # Get current domain using logged-on user's credentials
+    $CurrentDomain = "LDAP://" + ([ADSI]"").distinguishedName
+    $domain = New-Object System.DirectoryServices.DirectoryEntry($CurrentDomain,$UserName,$Password)
+    
+    if ($domain.name -eq $null)
+    {
+        write-host "Authentication failed - please verify your username and password." -ForegroundColor Red
+        Remove-Item -Path $security_path -Force
+        $password = $null
+        exit #terminate the script.
+    }
+    else
+    {
+        write-host "Successfully authenticated!" -ForegroundColor Green
+        return $credential
+    }
+    
+}
+
+# Check computer info
 function checkinfo {
     param (
-        [string]$cp
+        [string] $cp, $credential, $pstool_location
     )
     Write-Host "---------------------------------------------------------";
-    $testcn = Test-Connection -ComputerName $cp -Quiet;
+    $testcn = Test-Connection -ComputerName $cp -Quiet -Count 2;
     if ($testcn -eq "True"){
         Write-Host "$cp is online" -ForegroundColor Green;
         Write-Host "---------------------------------------------------------";
         $ipaddress = (Test-Connection -ComputerName $cp -count 1).IPV4Address.IPAddressToString
         write-host "IP address is $ipaddress" -ForegroundColor Blue;
-        Invoke-Command -ComputerName $cp -Credential $cred -ScriptBlock{
+        Start-Process -Filepath $pstool_location -Argumentlist "\\$cp -h -d winrm.cmd quickconfig -q" -Credential $credential
+        Invoke-Command -ComputerName $cp -Credential $credential -ScriptBlock{
                 $macaddress = (Get-NetAdapter | Where-Object {$_.Name -like "Ethernet*"} | Where-Object {$_.Status -eq "Up"}).MacAddress;
                 Write-Host "MAC address is $macaddress" -ForegroundColor Blue;
                 Write-Host "---------------------------------------------------------";
@@ -30,9 +72,11 @@ function checkinfo {
                 $numberplus = $number + 1;
                 $gethdd = Get-PhysicalDisk | Select-Object MediaType, Size
                 $getwdversion = (Get-ComputerInfo).WindowsVersion
+                $getmainmodel = (Get-WmiObject win32_baseboard).Product
                 Write-Host "Username is: $getusername $username" -ForegroundColor Yellow;
                 Write-Host "---------------------------------------------------------";
                 Write-Host "CPU: $getcpu" -ForegroundColor Green;
+                Write-Host "Mainboard product: $getmainmodel"
                 Write-Host "Total RAM: $numberplus Gb";
                 Write-Host $gethdd;
                 Write-Host "---------------------------------------------------------";
@@ -41,36 +85,53 @@ function checkinfo {
                 Write-Host "---------------------------------------------------------";
                 write-host "Windows 10 version "$getwdversion -ForegroundColor Green;
                 Write-Host "---------------------------------------------------------";
-    }
+}
 }
     else {
         Write-Host "$cp is offline" -ForegroundColor Red;
     }
 }
 
-function checkmutiple{
-    $ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path;
-    $computer = Import-csv -Path "${ScriptDir}\source\computername.csv" -Header computername
-    foreach ($pc in $computer)
-    {
-        checkinfo -cp $pc.computername;
-    }
-}
-
+# check each computer
 function checkone{
+    param (
+        $credential, $pstool
+    )
     $comp = read-host "What is the computername? ";
     $ip = $comp;
-    if ($comp -like "saiwks*"){                     #update the PC naming convetion saiwks;
+    if ($comp -like "sa*****"){
         $computername = $comp;
     }elseif ($comp -like "*.*.*.*"){
-        $computername = (Resolve-DnsName -Name $ip).NameHost;
+        $a = (Resolve-DnsName -Name $ip).NameHost  | ForEach-Object split .
+        $computername = $a[0];
     }else {
         Write-Warning "Something went wrong! Please make sure your computername or IP address is right";
         exit;
     }
-    checkinfo -cp $computername;
+    $computerad = get-adcomputer -Searchbase "ou=computers,ou=sai,dc=gameloft,dc=org" -filter * -Properties operatingsystem | ? operatingsystem -match "windows" | Sort-Object name;
+    $computernameAd = $computerad.Name;
+    $findinad = $computernameAd | Select-String -Pattern "$computername";
+    [string]$computernameinAD = $findinad;
+    if ("$computernameinAD" -eq "$computername"){
+        Write-Host "This machine $computername exists on AD" -ForegroundColor Yellow;
+        checkinfo -cp $computername -cred $credential -pstool_location $pstool_location;
+    }else{
+        Write-Host "This machine $computername DOES NOT exist" -ForegroundColor Red;
+        checkinfo -cp $computername -cred $credential -pstool_location $pstool_location;
+    }
 }
 
-#remove or add # before function you want to run. For ex: If you want to get information of mutiple computers, remove # in checkmutiple and add #checkone and counterwork. 
-#checkmutiple;
-checkone;
+$cred = Save_credential -username $username -security_path $security_path
+checkone -credential $cred -pstool $pstool_location
+
+do{
+    $answer = read-host "Do you want to continue? (y/n)"
+    $response = @('y','yes')
+
+    for ($i=0;$i -le $response.Count;$i++){
+        if ($answer -eq $response[$i]){
+            checkone -credential $cred -pstool $pstool_location
+            break
+        }
+    }
+}while($answer -ne 'n')
