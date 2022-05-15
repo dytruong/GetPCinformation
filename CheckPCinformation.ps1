@@ -1,5 +1,5 @@
 #############################################################  
-$username = "truong_tranduy"    
+$username = "anv"    
 $security_path = "C:\Windows\Temp\passwd.txt"
 $pstool_location = "C:\Pstool\psexec.exe"
 
@@ -108,7 +108,7 @@ function checkone{
         Write-Warning "Something went wrong! Please make sure your computername or IP address is right";
         exit;
     }
-    $computerad = get-adcomputer -Searchbase "ou=computers,ou=sai,dc=gameloft,dc=org" -filter * -Properties operatingsystem | ? operatingsystem -match "windows" | Sort-Object name;
+    $computerad = get-adcomputer -Searchbase "ou=computers,ou=wi,dc=abc,dc=org" -filter * -Properties operatingsystem | ? operatingsystem -match "windows" | Sort-Object name;
     $computernameAd = $computerad.Name;
     $findinad = $computernameAd | Select-String -Pattern "$computername";
     [string]$computernameinAD = $findinad;
